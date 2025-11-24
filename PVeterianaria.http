@@ -1,0 +1,6 @@
+@PVeterianaria_HostAddress = http://localhost:5287
+
+GET {{PVeterianaria_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
