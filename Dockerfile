@@ -8,29 +8,24 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copiar SOLO el .csproj desde la carpeta correcta
-COPY ["PVeterianaria/PVeterianaria.csproj", "./"]
+# El .csproj está en la raíz del repo
+COPY ["PVeterianaria.csproj", "./"]
 
-# Restaurar dependencias
-RUN dotnet restore "./PVeterianaria.csproj"
+RUN dotnet restore "PVeterianaria.csproj"
 
 # Copiar todo el código
 COPY . .
 
-# Compilar el proyecto
-RUN dotnet build "./PVeterianaria.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# Compilar
+RUN dotnet build "PVeterianaria.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # FASE 3 — Publicación
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./PVeterianaria.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "PVeterianaria.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# FASE FINAL — Imagen liviana para producción
+# FASE FINAL — Imagen ligera
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-
-# Copiar publicación
-COPY --from=publish /app/publish ./
-
-# Ejecutar API
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PVeterianaria.dll"]
